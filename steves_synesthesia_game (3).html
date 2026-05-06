@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synesthesia Guessing Game - Custom Edition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            color: #e0e0e0;
+            margin-bottom: 15px;
+        }
+
+        .mode-toggle {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .mode-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid transparent;
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #333;
+            border: 2px solid #ffd700;
+        }
+
+        .main-content {
+            display: flex;
+            gap: 20px;
+        }
+
+        .editor-panel {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            display: none;
+        }
+
+        .editor-panel.active {
+            display: block;
+        }
+
+        .game-panel {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            display: none;
+        }
+
+        .game-panel.active {
+            display: block;
+        }
+
+        .panel-title {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #ffd700;
+        }
+
+        .category-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .category-btn:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .category-btn.active {
+            background: rgba(255, 255, 255, 0.4);
+            border: 2px solid white;
+        }
+
+        .category-edit-icon {
+            margin-left: 5px;
+            font-size: 0.8em;
+            opacity: 0.7;
+        }
+
+        .question-editor {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .editor-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .editor-label {
+            font-weight: bold;
+            min-width: 120px;
+        }
+
+        .editor-input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+
+        .color-picker {
+            width: 80px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .texture-select {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            cursor: pointer;
+        }
+
+        .question-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .question-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .question-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        .question-item.selected {
+            background: rgba(255, 215, 0, 0.3);
+            border: 2px solid #ffd700;
+        }
+
+        .question-stimulus {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .question-answer {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .answer-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 2px solid white;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4ecdc4, #1a8fe3);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(78, 205, 196, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4caf50, #45a049);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b, #c92a2a);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #9c27b0, #673ab7);
+            color: white;
+        }
+
+        .btn-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(156, 39, 176, 0.4);
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Game Mode Styles */
+        .question-area {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .prompt-text {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            color: #e0e0e0;
+        }
+
+        .stimulus {
+            font-size: 4em;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .option-card {
+            padding: 30px 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+            font-weight: bold;
+            font-size: 1.1em;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-card:hover {
+            transform: scale(1.05);
+            border-color: white;
+        }
+
+        .option-card.selected {
+            border-color: #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .option-card.correct {
+            border-color: #4caf50;
+            background: rgba(76, 175, 80, 0.3) !important;
+            animation: correctPulse 0.5s ease-out;
+        }
+
+        .option-card.incorrect {
+            border-color: #f44336;
+            background: rgba(244, 67, 54, 0.3) !important;
+            animation: shake 0.5s ease-out;
+        }
+
+        @keyframes correctPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .texture-option {
+            background: rgba(255, 255, 255, 0.2);
+            position: relative;
+        }
+
+        .texture-smooth { background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); color: #1976d2; }
+        .texture-rough { background: repeating-linear-gradient(45deg, #8d6e63, #8d6e63 10px, #6d4c41 10px, #6d4c41 20px); color: white; }
+        .texture-soft { background: radial-gradient(circle, #f8bbd0 0%, #f48fb1 100%); color: #c2185b; }
+        .texture-sharp { background: linear-gradient(45deg, #263238 25%, transparent 25%, transparent 75%, #263238 75%, #263238), linear-gradient(45deg, #263238 25%, transparent 25%, transparent 75%, #263238 75%, #263238); background-size: 20px 20px; background-position: 0 0, 10px 10px; background-color: #455a64; color: white; }
+        .texture-fuzzy { background: radial-gradient(circle at 20% 50%, #ce93d8 0%, #ba68c8 50%, #ab47bc 100%); color: white; }
+        .texture-metallic { background: linear-gradient(135deg, #cfd8dc 0%, #90a4ae 50%, #607d8b 100%); color: white; }
+
+        .color-swatch {
+            width: 100%;
+            height: 80px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-label {
+            font-size: 0.9em;
+            color: #e0e0e0;
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .feedback {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1.1em;
+            text-align: center;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .feedback.correct {
+            background: rgba(76, 175, 80, 0.3);
+            border: 2px solid #4caf50;
+        }
+
+        .feedback.incorrect {
+            background: rgba(244, 67, 54, 0.3);
+            border: 2px solid #f44336;
+        }
+
+        .explanation {
+            margin-top: 15px;
+            font-size: 0.95em;
+            line-height: 1.6;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .info-banner {
+            background: rgba(255, 193, 7, 0.2);
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .texture-preview-box {
+            width: 100%;
+            height: 60px;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .category-settings {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .category-name-display {
+            font-size: 1.5em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 15px;
+            color: #ffd700;
+        }
+
+        .progress-info {
+            background: rgba(156, 39, 176, 0.2);
+            border: 2px solid #9c27b0;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+        .progress-info.complete {
+            background: rgba(76, 175, 80, 0.2);
+            border: 2px solid #4caf50;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #ffd700;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌈 Synesthesia Guessing Game 🧠</h1>
+            <p class="subtitle">Create your own synesthetic associations!</p>
+            <div class="mode-toggle">
+                <button class="mode-btn" onclick="switchMode('editor')">✏️ Edit Mode</button>
+                <button class="mode-btn active" onclick="switchMode('game')">🎮 Play Mode</button>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Editor Panel -->
+            <div class="editor-panel" id="editorPanel">
+                <h2 class="panel-title">Question Editor</h2>
+                
+                <div class="info-banner">
+                    Click on a question to edit it, or create new ones!<br>
+                    <strong>Click "Rename Category" to customize category names!</strong>
+                </div>
+
+                <div class="category-selector" id="editorCategorySelector">
+                    <!-- Categories will be dynamically generated -->
+                </div>
+
+                <div class="category-settings">
+                    <div class="category-name-display" id="categoryNameDisplay">Numbers</div>
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="openRenameCategoryModal()">✏️ Rename Category</button>
+                    </div>
+                </div>
+
+                <div class="question-editor">
+                    <div class="editor-row">
+                        <span class="editor-label">Stimulus:</span>
+                        <input type="text" class="editor-input" id="editStimulus" placeholder="e.g., 7, Monday, Math">
+                    </div>
+                    <div class="editor-row" id="colorAnswerRow">
+                        <span class="editor-label">Correct Color:</span>
+                        <input type="color" class="color-picker" id="editColorAnswer" value="#FF0000">
+                        <input type="text" class="editor-input" id="editColorHex" placeholder="#FF0000" style="max-width: 150px;">
+                    </div>
+                    <div class="editor-row" id="textureAnswerRow" style="display: none;">
+                        <span class="editor-label">Correct Texture:</span>
+                        <select class="texture-select" id="editTextureAnswer" onchange="updateTexturePreview()">
+                            <option value="smooth">Smooth</option>
+                            <option value="rough">Rough</option>
+                            <option value="soft">Soft</option>
+                            <option value="sharp">Sharp</option>
+                            <option value="fuzzy">Fuzzy</option>
+                            <option value="metallic">Metallic</option>
+                        </select>
+                    </div>
+                    <div id="texturePreviewContainer" style="display: none;">
+                        <div class="texture-preview-box" id="texturePreview"></div>
+                    </div>
+                    <div class="editor-row">
+                        <span class="editor-label">Explanation:</span>
+                        <input type="text" class="editor-input" id="editExplanation" placeholder="Why this association makes sense...">
+                    </div>
+                    <div class="button-group">
+                        <button class="btn btn-success" onclick="saveQuestion()">💾 Save Question</button>
+                        <button class="btn btn-primary" onclick="addNewQuestion()">➕ New Question</button>
+                        <button class="btn btn-danger" onclick="deleteQuestion()">🗑️ Delete</button>
+                    </div>
+                </div>
+
+                <h3 style="margin: 20px 0; text-align: center;">Questions in this category:</h3>
+                <div class="question-list" id="questionList"></div>
+
+                <div class="button-group" style="margin-top: 20px;">
+                    <button class="btn btn-warning" onclick="exportData()">📥 Export Data</button>
+                    <button class="btn btn-primary" onclick="importData()">📤 Import Data</button>
+                </div>
+            </div>
+
+            <!-- Game Panel -->
+            <div class="game-panel active" id="gamePanel">
+                <h2 class="panel-title">Play the Game</h2>
+
+                <div class="score-board">
+                    <div class="score-item">
+                        <div class="score-label">Score</div>
+                        <div class="score-value" id="score">0</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-label">Streak</div>
+                        <div class="score-value" id="streak">0</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-label">Progress</div>
+                        <div class="score-value" id="progress">0/0</div>
+                    </div>
+                </div>
+
+                <div class="progress-info" id="progressInfo">
+                    Questions answered: <strong>0</strong> of <strong>0</strong>
+                </div>
+
+                <div class="category-selector" id="gameCategorySelector">
+                    <!-- Categories will be dynamically generated -->
+                </div>
+
+                <div class="question-area">
+                    <div class="prompt-text" id="promptText">What color does Steve see?</div>
+                    <div class="stimulus" id="stimulus">7</div>
+                </div>
+
+                <div class="options-grid" id="optionsGrid"></div>
+
+                <div class="button-group">
+                    <button class="btn btn-warning" id="submitBtn" onclick="checkAnswer()" disabled style="padding: 15px 40px; font-size: 1.2em;">Submit Answer</button>
+                    <button class="btn btn-info" onclick="startOver()" style="padding: 15px 40px; font-size: 1.2em;">🔄 Start Over</button>
+                </div>
+
+                <div class="feedback" id="feedback">
+                    <div id="feedbackText"></div>
+                    <div class="explanation" id="explanation"></div>
+                    <button class="btn btn-primary" onclick="nextQuestion()" style="margin-top: 15px;">Next Question →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rename Category Modal -->
+    <div class="modal" id="renameCategoryModal">
+        <div class="modal-content">
+            <h2 class="modal-title">Rename Category</h2>
+            <input type="text" class="modal-input" id="newCategoryName" placeholder="Enter new category name">
+            <div class="button-group">
+                <button class="btn btn-success" onclick="saveNewCategoryName()">✅ Save</button>
+                <button class="btn btn-danger" onclick="closeRenameCategoryModal()">❌ Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Default data structure with category display names
+        let synesthesiaData = {
+            numbers: {
+                displayName: 'Numbers',
+                type: 'color',
+                prompt: 'What color does Steve see with this number?',
+                items: [
+                    { stimulus: '0', answer: '#FFFFFF', explanation: 'Steve sees 0 as white or transparent.' },
+                    { stimulus: '1', answer: '#000000', explanation: 'Steve sees 1 as black or white - pure and singular.' },
+                    { stimulus: '2', answer: '#FFFF00', explanation: 'Steve sees 2 as yellow - soft and paired.' },
+                    { stimulus: '3', answer: '#00FF00', explanation: 'Steve sees 3 as green - vibrant and growing.' },
+                    { stimulus: '4', answer: '#0000FF', explanation: 'Steve sees 4 as blue - stable and grounded.' },
+                    { stimulus: '5', answer: '#FF0000', explanation: 'Steve sees 5 as red - energetic and central.' },
+                    { stimulus: '6', answer: '#FFA500', explanation: 'Steve sees 6 as orange - warm and rounded.' },
+                    { stimulus: '7', answer: '#800080', explanation: 'Steve sees 7 as purple - mystical and lucky.' },
+                    { stimulus: '8', answer: '#8B4513', explanation: 'Steve sees 8 as brown - balanced and infinite.' },
+                    { stimulus: '9', answer: '#000000', explanation: 'Steve sees 9 as black - complete and deep.' }
+                ]
+            },
+            letters: {
+                displayName: 'Letters',
+                type: 'color',
+                prompt: 'What color does Steve see with this letter?',
+                items: [
+                    { stimulus: 'A', answer: '#FF0000', explanation: 'Steve sees A as red - the first letter, bold and primary.' },
+                    { stimulus: 'B', answer: '#0000FF', explanation: 'Steve sees B as blue - second and supportive.' },
+                    { stimulus: 'C', answer: '#FFFF00', explanation: 'Steve sees C as yellow - bright and curved.' }
+                ]
+            },
+            days: {
+                displayName: 'Days',
+                type: 'color',
+                prompt: 'What color does Steve see with this day?',
+                items: [
+                    { stimulus: 'Monday', answer: '#808080', explanation: 'Steve sees Monday as gray or dark blue - the heavy start to the week.' },
+                    { stimulus: 'Tuesday', answer: '#FF0000', explanation: 'Steve sees Tuesday as red - energetic, getting into the rhythm.' },
+                    { stimulus: 'Wednesday', answer: '#00FF00', explanation: 'Steve sees Wednesday as green - the balanced midpoint, halfway there.' },
+                    { stimulus: 'Thursday', answer: '#FFA500', explanation: 'Steve sees Thursday as orange - warm anticipation building.' },
+                    { stimulus: 'Friday', answer: '#FFFF00', explanation: 'Steve sees Friday as bright yellow or gold - excitement and celebration!' },
+                    { stimulus: 'Saturday', answer: '#0000FF', explanation: 'Steve sees Saturday as blue - calm, relaxed, and free.' },
+                    { stimulus: 'Sunday', answer: '#800080', explanation: 'Steve sees Sunday as purple or lavender - peaceful and reflective.' }
+                ]
+            },
+            subjects: {
+                displayName: 'Subjects',
+                type: 'color',
+                prompt: 'What color does Steve see with this subject?',
+                items: [
+                    { stimulus: 'Math', answer: '#0000FF', explanation: 'Steve sees Math as blue - logical and structured.' },
+                    { stimulus: 'English', answer: '#FFFF00', explanation: 'Steve sees English as yellow - creative and warm.' }
+                ]
+            },
+            names: {
+                displayName: 'Names',
+                type: 'texture',
+                prompt: 'What texture does Steve feel with this name?',
+                items: [
+                    { stimulus: 'Emma', answer: 'soft', explanation: 'Steve feels Emma as soft - the gentle "E" and "M" sounds create a plush sensation.' },
+                    { stimulus: 'James', answer: 'smooth', explanation: 'Steve feels James as smooth - the flowing "J" creates a polished texture.' },
+                    { stimulus: 'Sophia', answer: 'fuzzy', explanation: 'Steve feels Sophia as fuzzy or silky - the "S" and "ph" create a delicate texture.' },
+                    { stimulus: 'Oliver', answer: 'rough', explanation: 'Steve feels Oliver as rough or textured - the hard consonants create an uneven feel.' },
+                    { stimulus: 'Ava', answer: 'sharp', explanation: 'Steve feels Ava as sharp - the strong "A" and "V" sounds create angular sensations.' },
+                    { stimulus: 'Noah', answer: 'smooth', explanation: 'Steve feels Noah as smooth and flowing - like water, gentle and continuous.' }
+                ]
+            }
+        };
+
+        // Load from localStorage if available
+        const savedData = localStorage.getItem('synesthesiaData');
+        if (savedData) {
+            const loaded = JSON.parse(savedData);
+            // Ensure displayName exists for all categories
+            Object.keys(loaded).forEach(key => {
+                if (!loaded[key].displayName) {
+                    loaded[key].displayName = key.charAt(0).toUpperCase() + key.slice(1);
+                }
+            });
+            synesthesiaData = loaded;
+        }
+
+        // Game state - START IN GAME MODE
+        let currentMode = 'game';
+        let editorCategory = 'numbers';
+        let gameCategory = 'numbers';
+        let selectedQuestionIndex = null;
+        let currentQuestion = null;
+        let selectedAnswer = null;
+        let score = 0;
+        let streak = 0;
+        let askedQuestions = []; // Track questions already asked
+        let remainingQuestions = []; // Pool of questions not yet asked
+
+        // Initialize
+        function init() {
+            renderCategoryButtons();
+            loadQuestionList();
+            syncColorInputs();
+            updateTexturePreview();
+            updateCategoryNameDisplay();
+            initializeQuestionPool();
+            loadGameQuestion(); // Load first question immediately
+        }
+
+        function initializeQuestionPool() {
+            const items = synesthesiaData[gameCategory].items;
+            remainingQuestions = [...items];
+            askedQuestions = [];
+            updateProgressDisplay();
+        }
+
+        function renderCategoryButtons() {
+            const editorSelector = document.getElementById('editorCategorySelector');
+            const gameSelector = document.getElementById('gameCategorySelector');
+            
+            editorSelector.innerHTML = '';
+            gameSelector.innerHTML = '';
+            
+            Object.keys(synesthesiaData).forEach(key => {
+                const category = synesthesiaData[key];
+                
+                // Editor button
+                const editorBtn = document.createElement('button');
+                editorBtn.className = 'category-btn';
+                editorBtn.dataset.category = key;
+                if (key === editorCategory) editorBtn.classList.add('active');
+                editorBtn.innerHTML = category.displayName;
+                editorBtn.onclick = () => selectEditorCategory(key);
+                editorSelector.appendChild(editorBtn);
+                
+                // Game button
+                const gameBtn = document.createElement('button');
+                gameBtn.className = 'category-btn';
+                gameBtn.dataset.category = key;
+                if (key === gameCategory) gameBtn.classList.add('active');
+                gameBtn.textContent = category.displayName;
+                gameBtn.onclick = () => selectGameCategory(key);
+                gameSelector.appendChild(gameBtn);
+            });
+        }
+
+        function updateCategoryNameDisplay() {
+            document.getElementById('categoryNameDisplay').textContent = synesthesiaData[editorCategory].displayName;
+        }
+
+        function updateProgressDisplay() {
+            const total = synesthesiaData[gameCategory].items.length;
+            const answered = askedQuestions.length;
+            
+            document.getElementById('progress').textContent = `${answered}/${total}`;
+            
+            const progressInfo = document.getElementById('progressInfo');
+            progressInfo.innerHTML = `Questions answered: <strong>${answered}</strong> of <strong>${total}</strong>`;
+            
+            if (answered === total && total > 0) {
+                progressInfo.classList.add('complete');
+                progressInfo.innerHTML += '<br>🎉 <strong>All questions completed! Click "Start Over" to play again.</strong>';
+            } else {
+                progressInfo.classList.remove('complete');
+            }
+        }
+
+        function openRenameCategoryModal() {
+            document.getElementById('newCategoryName').value = synesthesiaData[editorCategory].displayName;
+            document.getElementById('renameCategoryModal').classList.add('show');
+        }
+
+        function closeRenameCategoryModal() {
+            document.getElementById('renameCategoryModal').classList.remove('show');
+        }
+
+        function saveNewCategoryName() {
+            const newName = document.getElementById('newCategoryName').value.trim();
+            if (!newName) {
+                alert('Please enter a category name!');
+                return;
+            }
+            
+            synesthesiaData[editorCategory].displayName = newName;
+            saveToLocalStorage();
+            renderCategoryButtons();
+            updateCategoryNameDisplay();
+            closeRenameCategoryModal();
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (mode === 'editor') {
+                document.getElementById('editorPanel').classList.add('active');
+                document.getElementById('gamePanel').classList.remove('active');
+            } else {
+                document.getElementById('editorPanel').classList.remove('active');
+                document.getElementById('gamePanel').classList.add('active');
+                loadGameQuestion();
+            }
+        }
+
+        // Editor functions
+        function selectEditorCategory(category) {
+            editorCategory = category;
+            renderCategoryButtons();
+            updateCategoryNameDisplay();
+            
+            const isTexture = synesthesiaData[category].type === 'texture';
+            document.getElementById('colorAnswerRow').style.display = isTexture ? 'none' : 'flex';
+            document.getElementById('textureAnswerRow').style.display = isTexture ? 'flex' : 'none';
+            document.getElementById('texturePreviewContainer').style.display = isTexture ? 'block' : 'none';
+            
+            if (isTexture) {
+                updateTexturePreview();
+            }
+            
+            loadQuestionList();
+            clearEditor();
+        }
+
+        function updateTexturePreview() {
+            const texture = document.getElementById('editTextureAnswer').value;
+            const preview = document.getElementById('texturePreview');
+            preview.className = 'texture-preview-box texture-option texture-' + texture;
+            preview.textContent = texture.charAt(0).toUpperCase() + texture.slice(1);
+        }
+
+        function loadQuestionList() {
+            const list = document.getElementById('questionList');
+            list.innerHTML = '';
+            
+            const items = synesthesiaData[editorCategory].items;
+            items.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'question-item';
+                if (index === selectedQuestionIndex) {
+                    div.classList.add('selected');
+                }
+                
+                const stimulus = document.createElement('div');
+                stimulus.className = 'question-stimulus';
+                stimulus.textContent = item.stimulus;
+                
+                const answer = document.createElement('div');
+                answer.className = 'question-answer';
+                
+                if (synesthesiaData[editorCategory].type === 'color') {
+                    const preview = document.createElement('div');
+                    preview.className = 'answer-preview';
+                    preview.style.backgroundColor = item.answer;
+                    answer.appendChild(preview);
+                    answer.appendChild(document.createTextNode(item.answer));
+                } else {
+                    answer.textContent = item.answer;
+                }
+                
+                div.appendChild(stimulus);
+                div.appendChild(answer);
+                div.onclick = () => selectQuestion(index);
+                list.appendChild(div);
+            });
+        }
+
+        function selectQuestion(index) {
+            selectedQuestionIndex = index;
+            const item = synesthesiaData[editorCategory].items[index];
+            
+            document.getElementById('editStimulus').value = item.stimulus;
+            document.getElementById('editExplanation').value = item.explanation;
+            
+            if (synesthesiaData[editorCategory].type === 'color') {
+                document.getElementById('editColorAnswer').value = item.answer;
+                document.getElementById('editColorHex').value = item.answer;
+            } else {
+                document.getElementById('editTextureAnswer').value = item.answer;
+                updateTexturePreview();
+            }
+            
+            loadQuestionList();
+        }
+
+        function clearEditor() {
+            selectedQuestionIndex = null;
+            document.getElementById('editStimulus').value = '';
+            document.getElementById('editExplanation').value = '';
+            document.getElementById('editColorAnswer').value = '#FF0000';
+            document.getElementById('editColorHex').value = '#FF0000';
+            document.getElementById('editTextureAnswer').value = 'smooth';
+            updateTexturePreview();
+            loadQuestionList();
+        }
+
+        function addNewQuestion() {
+            clearEditor();
+        }
+
+        function saveQuestion() {
+            const stimulus = document.getElementById('editStimulus').value.trim();
+            const explanation = document.getElementById('editExplanation').value.trim();
+            
+            if (!stimulus || !explanation) {
+                alert('Please fill in all fields!');
+                return;
+            }
+            
+            let answer;
+            if (synesthesiaData[editorCategory].type === 'color') {
+                answer = document.getElementById('editColorAnswer').value;
+            } else {
+                answer = document.getElementById('editTextureAnswer').value;
+            }
+            
+            const newItem = { stimulus, answer, explanation };
+            
+            if (selectedQuestionIndex !== null) {
+                synesthesiaData[editorCategory].items[selectedQuestionIndex] = newItem;
+            } else {
+                synesthesiaData[editorCategory].items.push(newItem);
+            }
+            
+            saveToLocalStorage();
+            loadQuestionList();
+            clearEditor();
+            alert('Question saved!');
+        }
+
+        function deleteQuestion() {
+            if (selectedQuestionIndex === null) {
+                alert('Please select a question to delete!');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to delete this question?')) {
+                synesthesiaData[editorCategory].items.splice(selectedQuestionIndex, 1);
+                saveToLocalStorage();
+                loadQuestionList();
+                clearEditor();
+            }
+        }
+
+        function syncColorInputs() {
+            const colorPicker = document.getElementById('editColorAnswer');
+            const hexInput = document.getElementById('editColorHex');
+            
+            colorPicker.addEventListener('input', (e) => {
+                hexInput.value = e.target.value.toUpperCase();
+            });
+            
+            hexInput.addEventListener('input', (e) => {
+                const hex = e.target.value;
+                if (/^#[0-9A-F]{6}$/i.test(hex)) {
+                    colorPicker.value = hex;
+                }
+            });
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('synesthesiaData', JSON.stringify(synesthesiaData));
+        }
+
+        function exportData() {
+            const dataStr = JSON.stringify(synesthesiaData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'synesthesia_data.json';
+            link.click();
+        }
+
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const loaded = JSON.parse(event.target.result);
+                        // Ensure displayName exists for all categories
+                        Object.keys(loaded).forEach(key => {
+                            if (!loaded[key].displayName) {
+                                loaded[key].displayName = key.charAt(0).toUpperCase() + key.slice(1);
+                            }
+                        });
+                        synesthesiaData = loaded;
+                        saveToLocalStorage();
+                        renderCategoryButtons();
+                        loadQuestionList();
+                        updateCategoryNameDisplay();
+                        alert('Data imported successfully!');
+                    } catch (error) {
+                        alert('Error importing data: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // Game functions
+        function selectGameCategory(category) {
+            gameCategory = category;
+            renderCategoryButtons();
+            startOver();
+        }
+
+        function startOver() {
+            score = 0;
+            streak = 0;
+            initializeQuestionPool();
+            updateScoreBoard();
+            loadGameQuestion();
+        }
+
+        function loadGameQuestion() {
+            const categoryData = synesthesiaData[gameCategory];
+            
+            if (remainingQuestions.length === 0) {
+                // All questions have been asked
+                document.getElementById('stimulus').textContent = '🎉';
+                document.getElementById('promptText').textContent = 'All questions completed!';
+                document.getElementById('optionsGrid').innerHTML = '';
+                document.getElementById('submitBtn').disabled = true;
+                document.getElementById('feedback').classList.remove('show');
+                updateProgressDisplay();
+                return;
+            }
+            
+            // Pick a random question from remaining pool
+            const randomIndex = Math.floor(Math.random() * remainingQuestions.length);
+            currentQuestion = remainingQuestions[randomIndex];
+            
+            // Remove from remaining and add to asked
+            remainingQuestions.splice(randomIndex, 1);
+            askedQuestions.push(currentQuestion);
+            
+            document.getElementById('promptText').textContent = categoryData.prompt;
+            document.getElementById('stimulus').textContent = currentQuestion.stimulus;
+            
+            renderGameOptions();
+            
+            selectedAnswer = null;
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('feedback').classList.remove('show');
+            updateProgressDisplay();
+        }
+
+        function renderGameOptions() {
+            const grid = document.getElementById('optionsGrid');
+            grid.innerHTML = '';
+            
+            const isTexture = synesthesiaData[gameCategory].type === 'texture';
+            
+            // Generate options
+            let options = [currentQuestion.answer];
+            const allItems = synesthesiaData[gameCategory].items;
+            
+            while (options.length < 6 && options.length < allItems.length) {
+                const randomItem = allItems[Math.floor(Math.random() * allItems.length)];
+                if (!options.includes(randomItem.answer)) {
+                    options.push(randomItem.answer);
+                }
+            }
+            
+            // Shuffle options
+            options.sort(() => Math.random() - 0.5);
+            
+            options.forEach(option => {
+                const card = document.createElement('div');
+                card.className = 'option-card';
+                
+                if (isTexture) {
+                    card.classList.add('texture-option', `texture-${option}`);
+                    card.textContent = option.charAt(0).toUpperCase() + option.slice(1);
+                } else {
+                    const swatch = document.createElement('div');
+                    swatch.className = 'color-swatch';
+                    swatch.style.backgroundColor = option;
+                    card.appendChild(swatch);
+                    card.appendChild(document.createTextNode(option));
+                }
+                
+                card.dataset.answer = option;
+                card.addEventListener('click', () => selectGameOption(card, option));
+                grid.appendChild(card);
+            });
+        }
+
+        function selectGameOption(card, answer) {
+            document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedAnswer = answer;
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        function checkAnswer() {
+            if (!selectedAnswer) return;
+            
+            const isCorrect = selectedAnswer === currentQuestion.answer;
+            const feedback = document.getElementById('feedback');
+            const feedbackText = document.getElementById('feedbackText');
+            const explanation = document.getElementById('explanation');
+            
+            document.querySelectorAll('.option-card').forEach(card => {
+                if (card.dataset.answer === currentQuestion.answer) {
+                    card.classList.add('correct');
+                } else if (card.dataset.answer === selectedAnswer && !isCorrect) {
+                    card.classList.add('incorrect');
+                }
+                card.style.pointerEvents = 'none';
+            });
+            
+            if (isCorrect) {
+                score += 10;
+                streak++;
+                feedbackText.innerHTML = '🎉 Correct! You\'re thinking like Steve!';
+                feedback.className = 'feedback correct show';
+            } else {
+                streak = 0;
+                feedbackText.innerHTML = '❌ Not quite! Here\'s what Steve sees:';
+                feedback.className = 'feedback incorrect show';
+            }
+            
+            explanation.textContent = currentQuestion.explanation;
+            updateScoreBoard();
+            document.getElementById('submitBtn').disabled = true;
+        }
+
+        function nextQuestion() {
+            loadGameQuestion();
+        }
+
+        function updateScoreBoard() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('streak').textContent = streak;
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('renameCategoryModal');
+            if (event.target === modal) {
+                closeRenameCategoryModal();
+            }
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+</html>
